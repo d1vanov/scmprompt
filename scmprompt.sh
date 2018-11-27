@@ -34,7 +34,8 @@ function setScmPrompt() {
 	local Red="\[\033[0;31m\]"          # Red
 	local Yellow="\[\033[0;33m\]"       # Yellow
 	local Blue="\[\033[0;34m\]"         # Blue
-	local WHITE='\[\033[37m\]'
+	local WHITE='\[\033[37m\]'          # White
+	local Green='\[\e[32m\]'            # Green
 
 	# Bold
 	local BGreen="\[\033[1;32m\]"       # Green
@@ -52,16 +53,16 @@ function setScmPrompt() {
 	local Username="\u"
 
 	# Default values for the appearance of the prompt. Configure at will.
-	local SCM_PROMPT_PREFIX="["
-	local SCM_PROMPT_SUFFIX="]"
-	local SCM_PROMPT_SEPARATOR="|"
-	local SCM_PROMPT_BRANCH="${Magenta}"
-	local SCM_PROMPT_STAGED="${Red}● "
-	local SCM_PROMPT_CONFLICTS="${Red}✖ "
-	local SCM_PROMPT_CHANGED="${Blue}✚ "
+	local SCM_PROMPT_PREFIX="("
+	local SCM_PROMPT_SUFFIX=")"
+	local SCM_PROMPT_SEPARATOR=""
+	local SCM_PROMPT_BRANCH="${Green}"
+	local SCM_PROMPT_STAGED="${Green} +"
+	local SCM_PROMPT_CONFLICTS="${Green} x"
+	local SCM_PROMPT_CHANGED="${Green} *"
 	local SCM_PROMPT_REMOTE=" "
 	local SCM_PROMPT_UNTRACKED="…"
-	local SCM_PROMPT_CLEAN="${BGreen}✔"
+	local SCM_PROMPT_CLEAN=""
     unset PROMPT_START
     unset PROMPT_END
     if [[ $EUID -ne 0 ]]; then
@@ -69,8 +70,8 @@ function setScmPrompt() {
     else
         local _USER="$Red$Username$ResetColor"
     fi
-    PROMPT_START="$_USER@$Yellow$Hostname $Blue$PathShort$ResetColor"
-    PROMPT_END=" $WHITE$Time12a$ResetColor\\$ "
+    PROMPT_START="[\D{%d.%m} \t]\[\033[35m\]\w\[\033[00m\]\[\033[32m\]"
+    PROMPT_END="\[\033[00m\]\n\[\033[32m\]\u\[\033[00m\]@\[\033[36m\]\h\[\033[00m\]> "
 
     if [ $exit_code -eq 0 ]; then
         exit_code="$BGreen$exit_code$ResetColor"
@@ -87,28 +88,24 @@ function setScmPrompt() {
           STATUS="$STATUS$SCM_PROMPT_REMOTE$SCM_REMOTE$ResetColor"
       fi
 
-      STATUS="$STATUS$SCM_PROMPT_SEPARATOR"
-      if [ "$SCM_STAGED" -ne "0" ]; then
-          STATUS="$STATUS$SCM_PROMPT_STAGED$SCM_STAGED$ResetColor"
-      fi
-
+      STATUS="$STATUS"
       if [ "$SCM_CONFLICTS" -ne "0" ]; then
-          STATUS="$STATUS$SCM_PROMPT_CONFLICTS$SCM_CONFLICTS$ResetColor"
+          STATUS="$STATUS$SCM_PROMPT_SEPARATOR$SCM_PROMPT_CONFLICTS$ResetColor"
+      fi
+      if [ "$SCM_STAGED" -ne "0" ]; then
+          STATUS="$STATUS$SCM_PROMPT_SEPARATOR$SCM_PROMPT_STAGED$ResetColor"
       fi
       if [ "$SCM_CHANGED" -ne "0" ]; then
-          STATUS="$STATUS$SCM_PROMPT_CHANGED$SCM_CHANGED$ResetColor"
-      fi
-      if [ "$SCM_UNTRACKED" -ne "0" ]; then
-          STATUS="$STATUS$SCM_PROMPT_UNTRACKED$SCM_UNTRACKED$ResetColor"
+          STATUS="$STATUS$SCM_PROMPT_SEPARATOR$SCM_PROMPT_CHANGED$ResetColor"
       fi
       if [ "$SCM_CLEAN" -eq "1" ]; then
-          STATUS="$STATUS$SCM_PROMPT_CLEAN"
+          STATUS="$STATUS$SCM_PROMPT_SEPARATOR$SCM_PROMPT_CLEAN"
       fi
       STATUS="$STATUS$ResetColor$SCM_PROMPT_SUFFIX"
 
-      PS1="[$exit_code] $PYTHON_VIRTUALENV$PROMPT_START$STATUS$PROMPT_END"
+      PS1="$PYTHON_VIRTUALENV$PROMPT_START$STATUS$PROMPT_END"
     else
-      PS1="[$exit_code] $PROMPT_START$PROMPT_END"
+      PS1="$PROMPT_START$PROMPT_END"
     fi
 }
 
